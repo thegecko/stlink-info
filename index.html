@@ -6,24 +6,32 @@
 <body>
     <h1>ST-LINK Information</h1>
     <button id="button">Select Device</button>
-    <div id="results"></div>
+    <div id="version"></div>
+    <div id="coreid"></div>
 
     <script type="module">
         import { DeviceInfo } from "./device-info.js";
 
         const buttonEl = document.getElementById("button");
-        const resultsEl = document.getElementById("results");
+        const versionEl = document.getElementById("version");
+        const coreidEl = document.getElementById("coreid");
 
         buttonEl.addEventListener("click", async () => {
             const device = await navigator.usb.requestDevice({
-                filters: [{vendorId: 0xD28}]
+                filters: [{ vendorId: 0x0483 }]
             });
 
             if (device) {
                 const deviceInfo = new DeviceInfo(device);
-                const results = await deviceInfo.getInfo();
-                if (results) {
-                    resultsEl.innerHTML = results;
+
+                const version = await deviceInfo.getStlinkVersion();
+                if (version) {
+                    versionEl.innerHTML = `STLINK version: ${version}`;
+                }
+
+                const coreid = await deviceInfo.getCoreId();
+                if (coreid) {
+                    coreidEl.innerHTML = `Core ID: ${coreid}`;
                 }
             }
         });
