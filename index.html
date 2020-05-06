@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ST-LINK Information</title>
+</head>
+<body>
+    <h1>ST-LINK Information</h1>
+    <button id="button">Select Device</button>
+    <div id="results"></div>
+
+    <script type="module">
+        import { DeviceInfo } from "./device-info.js";
+
+        const buttonEl = document.getElementById("button");
+        const resultsEl = document.getElementById("results");
+
+        buttonEl.addEventListener("click", async () => {
+            const device = await navigator.usb.requestDevice({
+                filters: [{vendorId: 0xD28}]
+            });
+
+            if (device) {
+                const deviceInfo = new DeviceInfo(device);
+                const results = await deviceInfo.getInfo();
+                if (results) {
+                    resultsEl.innerHTML = results;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
