@@ -8,6 +8,7 @@
     <button id="button">Select Device</button>
     <div id="version"></div>
     <div id="coreid"></div>
+    <div id="mbedid"></div>
 
     <script type="module">
         import { DeviceInfo } from "./device-info.js";
@@ -15,6 +16,7 @@
         const buttonEl = document.getElementById("button");
         const versionEl = document.getElementById("version");
         const coreidEl = document.getElementById("coreid");
+        const mbedidEl = document.getElementById("mbedid");
 
         buttonEl.addEventListener("click", async () => {
             const device = await navigator.usb.requestDevice({
@@ -32,6 +34,11 @@
                 const coreid = await deviceInfo.getCoreId();
                 if (coreid) {
                     coreidEl.innerHTML = `Core ID: ${coreid}`;
+                }
+
+                const mbedid = await deviceInfo.getMbedId();
+                if (mbedid) {
+                    mbedidEl.innerHTML = `Mbed ID: ${mbedid}`;
                 }
             }
         });

@@ -9,6 +9,9 @@ const STLINK_DEBUG_ENTER_SWD = 0xa3;
 const STLINK_DEBUG_READCOREID = 0x22;
 const STLINK_DEBUG_EXIT = 0x21;
 
+const STLINK_JTAG_COMMAND = 0xF2;
+const STLINK_JTAG_GET_BOARD_IDENTIFIERS = 0x56; // New in ST-Link/V2 from version J36 and ST-Link/V3 J6
+
 export class DeviceInfo {
     constructor(device) {
         this.device = device;
@@ -22,6 +25,18 @@ export class DeviceInfo {
             const stlink = ((version >> 12) & 0x0f);
             const jtag = ((version >> 6) & 0x3f);
             return `V${stlink}J${jtag}`;
+        } finally {
+            await this.disconnect();
+        }
+    }
+
+    async getMbedId() {
+        try {
+            await this.connect();
+            let result = await this.transfer([STLINK_JTAG_COMMAND, STLINK_JTAG_GET_BOARD_IDENTIFIERS], 128);
+            await this.write([STLINK_DEBUG_COMMAND, STLINK_DEBUG_EXIT]);
+            const codeArray = new Uint8Array(result.buffer, 2, 4);
+            return new TextDecoder("utf-8").decode(codeArray);
         } finally {
             await this.disconnect();
         }
@@ -62,9 +77,9 @@ export class DeviceInfo {
         await this.device.close();
     }
 
-    async transfer(command) {
+    async transfer(command, length = 64) {
         await this.write(command);
-        const result = await this.device.transferIn(0x81 & 0x7f, 64);
+        const result = await this.device.transferIn(0x81 & 0x7f, length);
         return result.data;
     }
 
